@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class EventDispatcher implements DynamicRouter<Event>
 {
-	private Map<Class<? extends Event>, Set<EventHandler>> handlers;
+	private final Map<Class<? extends Event>, Set<EventHandler>> handlers;
 
 	public EventDispatcher()
 	{
@@ -57,7 +57,7 @@ public class EventDispatcher implements DynamicRouter<Event>
 			{
 				return;
 			}
-			eventHandlerSet.remove((EventHandler) channel);
+			eventHandlerSet.remove(channel);
 		}
 	}
 
@@ -72,7 +72,7 @@ public class EventDispatcher implements DynamicRouter<Event>
 				{
 					continue;
 				}
-				eventHandlerSet.remove((EventHandler) channel);
+				eventHandlerSet.remove(channel);
 			}
 		}
 	}
