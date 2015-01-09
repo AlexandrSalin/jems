@@ -4,8 +4,8 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 }
 
-apply from: '../maven_push.gradle'
+//apply from: '../maven_push.gradle'
