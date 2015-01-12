@@ -1,16 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId "by.salin.demo.jems"
-        minSdkVersion 15
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 14
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        versionName project.VERSION_NAME
+        versionCode Integer.parseInt(project.VERSION_CODE)
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,5 +24,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile project(':JEMS')
+    compile 'by.salin:JEMS:0.0.1@aar'
+    //compile project(':JEMS')
 }
