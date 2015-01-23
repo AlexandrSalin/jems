@@ -8,6 +8,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import by.salin.apps.jems.EventHandlerCallback;
+import by.salin.apps.jems.JEMS;
+import by.salin.apps.jems.impl.Event;
 
 
 public class SampleActivity extends ActionBarActivity {
@@ -49,15 +54,42 @@ public class SampleActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment implements EventHandlerCallback {
 
         public PlaceholderFragment() {
         }
 
+        private TextView text;
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_sample, container, false);
+            View root = inflater.inflate(R.layout.fragment_sample, container, false);
+            text = (TextView) root.findViewById(R.id.text);
+            return root;
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+            JEMS.dispatcher().addListenerOnEvent(DemoJemsEvent.class, this);
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            JEMS.dispatcher().removeListener(this);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            DemoThread.launchDemo();
+        }
+
+        @Override
+        public void onEvent(Event event) {
+            text.setText(event.toString());
         }
     }
 }
