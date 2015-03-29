@@ -17,6 +17,7 @@ package by.salin.apps.jems.impl;
 
 import by.salin.apps.jems.Channel;
 import by.salin.apps.jems.DynamicRouter;
+import by.salin.apps.logger.LOG;
 
 import java.util.*;
 
@@ -37,13 +38,16 @@ public class EventDispatcher implements DynamicRouter<Event>
 	{
 		synchronized (handlers)
 		{
+            LOG.I(String.format("Try register new channel: {%s}, for event: {%s}", channel,contentType));
 			Set<EventHandler> eventHandlerSet = handlers.get(contentType);
 			if (eventHandlerSet == null)
 			{
+                LOG.I(String.format("Create new EventHandler set, for event: {%s}", contentType));
 				eventHandlerSet = Collections.synchronizedSet(new HashSet<EventHandler>());
 			}
 			eventHandlerSet.add((EventHandler) channel);
 			handlers.put(contentType, eventHandlerSet);
+            LOG.I(String.format("Handlers state after register: {%s}", handlers.size()));
 		}
 	}
 
@@ -52,12 +56,15 @@ public class EventDispatcher implements DynamicRouter<Event>
 	{
 		synchronized (handlers)
 		{
+            LOG.I(String.format("Try unregister new channel: {%s}, for event: {%s}", channel,contentType));
 			Set<EventHandler> eventHandlerSet = handlers.get(contentType);
 			if (eventHandlerSet == null)
 			{
 				return;
 			}
+            LOG.I(String.format("Remove channel: {%s}", channel));
 			eventHandlerSet.remove(channel);
+            LOG.I(String.format("Handlers state after unregister: {%s}", handlers.size()));
 		}
 	}
 
@@ -66,14 +73,17 @@ public class EventDispatcher implements DynamicRouter<Event>
 	{
 		synchronized (handlers)
 		{
+            LOG.I(String.format("Try unregister new channel: {%s}, for all events", channel));
 			for (Set<EventHandler> eventHandlerSet : handlers.values())
 			{
 				if (eventHandlerSet == null)
 				{
 					continue;
 				}
+                LOG.I(String.format("Remove channel: {%s}", channel));
 				eventHandlerSet.remove(channel);
 			}
+            LOG.I(String.format("Handlers state after unregister: {%s}", handlers.size()));
 		}
 	}
 
@@ -82,6 +92,7 @@ public class EventDispatcher implements DynamicRouter<Event>
 	{
 		synchronized (handlers)
 		{
+            LOG.I(String.format("start dispatch , handlers set: {%s}", handlers.size()));
 			Set<EventHandler> eventHandlerSet = handlers.get(content.getClass());
 			if (eventHandlerSet == null)
 			{
@@ -97,4 +108,27 @@ public class EventDispatcher implements DynamicRouter<Event>
 			}
 		}
 	}
+
+    public boolean stillNeeded(EventHandler handler) {
+        boolean result = false;
+        synchronized (handlers) {
+            LOG.I(String.format("start check handler still need: {%s}, from set: {%s}",handler, handlers.size()));
+            try {
+                for (Set<EventHandler> eventHandlerSet : handlers.values()) {
+                    if (eventHandlerSet == null) {
+                        continue;
+                    }
+                    for (EventHandler eventHandler : eventHandlerSet) {
+                        LOG.I(String.format("Compare: item from set {%s}, with item: {%s}",eventHandler,handler));
+                        if (eventHandler.equals(handler)) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOG.E(e.toString(), e);
+            }
+        }
+        return false;
+    }
 }

@@ -20,36 +20,45 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
+import by.salin.apps.logger.LOG;
+
 /**
  * Created by Alexandr.Salin on 20.12.13.
  */
-public class BackgroundHandler extends HandlerThread
-{
-	private static final String TAG = BackgroundHandler.class.getSimpleName();
-	private Handler mHandler;
-	private Handler.Callback callback;
+public class BackgroundHandler extends HandlerThread {
+    private static final String TAG = BackgroundHandler.class.getSimpleName();
+    private Handler mHandler;
+    private Handler.Callback callback;
 
-	BackgroundHandler(Handler.Callback callback)
-	{
-		super(TAG);
-		this.callback = callback;
-	}
+    BackgroundHandler(Handler.Callback callback) {
+        super(TAG);
+        this.callback = callback;
+    }
 
-	@Override
-	protected void onLooperPrepared()
-	{
-		super.onLooperPrepared();
-		Looper mLooper = getLooper();
-		if (mLooper != null)
-		{
-			mHandler = new Handler(getLooper(), callback);
-		}
-	}
+    @Override
+    protected void onLooperPrepared() {
+        super.onLooperPrepared();
+        Looper mLooper = getLooper();
+        if (mLooper != null) {
+            mHandler = new Handler(getLooper(), callback);
+        }
+    }
 
-	public void sendMessage(Message msg){
-		if (mHandler == null){
-			throw new IllegalStateException("Background handler for messaging between threads is null");
-		}
-		mHandler.sendMessage(msg);
-	}
+    public void sendMessage(Message msg) {
+        if (mHandler == null) {
+            throw new IllegalStateException("Background handler for messaging between threads is null");
+        }
+        mHandler.sendMessage(msg);
+    }
+
+    public void resolve() {
+        if (mHandler == null) {
+            return;
+        }
+        try {
+            getLooper().quit();
+        } catch (Exception e) {
+            LOG.E(e.toString(), e);
+        }
+    }
 }

@@ -22,8 +22,6 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'by.salin:JEMS:0.0.1@aar'
-    //compile project(':JEMS')
+    compile 'by.salin:JEMS:0.0.2@aar'
 }

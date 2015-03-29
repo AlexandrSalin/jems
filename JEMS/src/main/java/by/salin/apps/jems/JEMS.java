@@ -15,96 +15,101 @@
 
 package by.salin.apps.jems;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import by.salin.apps.jems.impl.Event;
 import by.salin.apps.jems.impl.EventDispatcher;
 import by.salin.apps.jems.impl.EventHandler;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import by.salin.apps.logger.LOG;
 
 /**
  * Created by root on 15.12.13.
  */
-public class JEMS
-{
-	static private final Map<EventHandlerCallback, EventHandler> handlerRegistry = new ConcurrentHashMap<EventHandlerCallback, EventHandler>();
-	static private final EventDispatcher dispatcher = new EventDispatcher();
-	static private JEMS instance;
+public class JEMS {
+    public static final String TAG = JEMS.class.getSimpleName();
+    static private final Map<EventHandlerCallback, EventHandler> handlerRegistry = new ConcurrentHashMap<EventHandlerCallback, EventHandler>();
+    static private final EventDispatcher dispatcher = new EventDispatcher();
+    static private JEMS instance;
 
-	static void defaultInit()
-	{
-		if (instance == null)
-		{
-			init();
-		}
-	}
+    static void defaultInit() {
+        
+        if (instance == null) {
+            init();
+        }
+    }
 
-	synchronized static void init()
-	{
-		if (instance == null)
-		{
-			instance = new JEMS();
-		}
-	}
+    synchronized static void init() {
+        if (instance == null) {
+            LOG.I("============= START INIT JEMS ===========");
+            instance = new JEMS();
+            LOG.I(String.format("============= JEMS - {%s} ===========", instance));
+        }
+    }
 
-	static public JEMS dispatcher()
-	{
-		defaultInit();
-		return instance;
-	}
+    static public JEMS dispatcher() {
+        defaultInit();
+        return instance;
+    }
 
-	public void addListenerOnEvent(Class<? extends Event> eventClazz, EventHandlerCallback listener)
-	{
-		EventHandler handler = handlerRegistry.get(listener);
-		if (handler != null)
-		{
-			dispatcher.registerChannel(eventClazz, handler);
-		}
-		else
-		{
-			synchronized (handlerRegistry)
-			{
-				handler = handlerRegistry.get(listener);
-				if (handler != null)
-				{
-					dispatcher.registerChannel(eventClazz, handler);
-				}
-				else
-				{
-					dispatcher.registerChannel(eventClazz, new EventHandler(listener));
-				}
-			}
-		}
-	}
+    public void addListenerOnEvent(Class<? extends Event> eventClazz, EventHandlerCallback listener) {
+        LOG.I(String.format("Add listener : {%s} on Event : {%s}", eventClazz, listener));
+        EventHandler handler = handlerRegistry.get(listener);
+        if (handler != null) {
+            LOG.I(String.format("Select already exists handler : {%s}", handler));
+            dispatcher.registerChannel(eventClazz, handler);
+        } else {
+            synchronized (handlerRegistry) {
+                handler = handlerRegistry.get(listener);
+                if (handler != null) {
+                    LOG.I(String.format("Select already exists handler : {%s}", handler));
+                    dispatcher.registerChannel(eventClazz, handler);
+                } else {
+                    handler = new EventHandler(listener);
+                    LOG.I(String.format("Create new handler : {%s}", handler));
+                    dispatcher.registerChannel(eventClazz, handler);
+                    handlerRegistry.put(listener, handler);
+                    LOG.I(String.format("handler registry after add. State : { %s}", handlerRegistry.size()));
+                }
+            }
+        }
+    }
 
-	public void removeListenerOnEvent(Class<? extends Event> eventClazz, EventHandlerCallback listener)
-	{
-		synchronized (handlerRegistry)
-		{
-			EventHandler handler = handlerRegistry.get(listener);
-			if (handler != null)
-			{
-				dispatcher.unregisterChannel(eventClazz, handler);
-				handlerRegistry.remove(handler);
-			}
-		}
-	}
+    public void removeListenerOnEvent(Class<? extends Event> eventClazz, EventHandlerCallback listener) {
+        synchronized (handlerRegistry) {
+            LOG.I(String.format("Remove listener : {%s} on Event : {%s}", eventClazz, listener));
+            EventHandler handler = handlerRegistry.get(listener);
+            LOG.I(String.format("try remove handler : {%s}", handler));
+            if (handler != null) {
+                dispatcher.unregisterChannel(eventClazz, handler);
+                if (!dispatcher.stillNeeded(handler)) {
+                    handlerRegistry.remove(listener);
+                    handler.resolve();
+                }
+                LOG.I(String.format("handler registry after remove. State : { %s}", handlerRegistry.size()));
+            }
+        }
+    }
 
-	public void removeListener(EventHandlerCallback listener)
-	{
-		synchronized (handlerRegistry)
-		{
-			EventHandler handler = handlerRegistry.get(listener);
-			if (handler != null)
-			{
-				dispatcher.unregisterChannel(handler);
-				handlerRegistry.remove(handler);
-			}
-		}
-	}
+    public void removeListener(EventHandlerCallback listener) {
+        synchronized (handlerRegistry) {
+            LOG.I(String.format("Remove listener : {%s} ", listener));
+            EventHandler handler = handlerRegistry.get(listener);
+            LOG.I(String.format("try remove handler : {%s}", handler));
+            if (handler != null) {
+                dispatcher.unregisterChannel(handler);
+                if (!dispatcher.stillNeeded(handler)) {
+                    handlerRegistry.remove(listener);
+                    handler.resolve();
+                }
+                LOG.I(String.format("handler registry after remove. State : { %s}", handlerRegistry.size()));
+            }
+        }
+    }
 
-	public void sendEvent(Event event)
-	{
-		dispatcher.dispatch(event);
-	}
+    public void sendEvent(Event event) {
+        LOG.I(String.format("Try send event:  {%s}", event));
+        dispatcher.dispatch(event);
+    }
+
 }
