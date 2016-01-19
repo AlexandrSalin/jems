@@ -6,6 +6,7 @@ import android.content.Context;
 import by.salin.apps.jems.EventHandlerCallback;
 import by.salin.apps.jems.JEMS;
 import by.salin.apps.jems.impl.Event;
+import by.salin.apps.logger.LOG;
 
 /**
  * App instance.
@@ -17,6 +18,7 @@ public class JEMSApp extends Application implements EventHandlerCallback {
     @Override
     public void onCreate() {
         super.onCreate();
+        LOG.setDebug(true);
         instance = this;
         JEMS.dispatcher().removeListener(this);
     }

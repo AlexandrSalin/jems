@@ -7,7 +7,7 @@ import by.salin.apps.logger.impl.AndroidLogger;
  */
 public class LOG {
 
-    private static final boolean DEBUG = false;
+    private static boolean debug = false;
 
     private static final InnerLogger logger = getLogger();
 
@@ -20,39 +20,42 @@ public class LOG {
     }
 
     public static void D(String msg) {
-        if (DEBUG) {
+        if (debug) {
             logger.D(msg);
         }
     }
 
     public static void I(String msg) {
-        if (DEBUG) {
+        if (debug) {
             logger.I(msg);
         }
     }
 
     public static void W(String msg) {
-        if (DEBUG) {
+        if (debug) {
             logger.W(msg);
         }
     }
 
     public static void W(String msg, Throwable e) {
-        if (DEBUG) {
+        if (debug) {
             logger.W(msg, e);
         }
     }
 
     public static void E(String msg) {
-        if (DEBUG) {
+        if (debug) {
             logger.E(msg);
         }
     }
 
     public static void E(String msg, Throwable e) {
-        if (DEBUG) {
+        if (debug) {
             logger.E(msg, e);
         }
     }
 
+    public static void setDebug(boolean DEBUG) {
+        debug = DEBUG;
+    }
 }
